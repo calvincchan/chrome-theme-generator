@@ -14,7 +14,10 @@ materialColors.forEach(color => {
   const swatch = document.createElement('div');
   swatch.className = 'swatch';
   swatch.style.backgroundColor = color;
-  swatch.onclick = () => updateTheme(color);
+  swatch.onclick = () => {
+    manualPicker.value = color;
+    updateTheme(color);
+  };
   paletteContainer.appendChild(swatch);
 });
 

@@ -120,6 +120,11 @@ Suggested flow:
 
 For help, feature ideas, or bugs, use GitHub Discussions in this repository.
 
+## Third-Party Credits
+
+- JSZip: https://github.com/Stuk/jszip
+- Used for generating downloadable ZIP files in the extension.
+
 ## License
 
 This project is licensed under the MIT License. See `LICENSE` for details.

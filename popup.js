@@ -2,6 +2,7 @@ const materialColors = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '
 
 
 const manualPicker = document.getElementById('manual-picker');
+const hexInput = document.getElementById('hex-input');
 const paletteContainer = document.getElementById('material-palette');
 const genBtn = document.getElementById('generate-btn');
 const themeNameInput = document.getElementById('theme-name');
@@ -16,12 +17,38 @@ materialColors.forEach(color => {
   swatch.style.backgroundColor = color;
   swatch.onclick = () => {
     manualPicker.value = color;
+    if (hexInput) hexInput.value = color;
+    setActiveSwatch(swatch);
     updateTheme(color);
   };
   paletteContainer.appendChild(swatch);
 });
 
-manualPicker.oninput = (e) => updateTheme(e.target.value);
+manualPicker.oninput = (e) => {
+  if (hexInput) hexInput.value = e.target.value;
+  clearActiveSwatch();
+  updateTheme(e.target.value);
+};
+
+if (hexInput) {
+  hexInput.oninput = (e) => {
+    const val = e.target.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+      manualPicker.value = val;
+      clearActiveSwatch();
+      updateTheme(val);
+    }
+  };
+}
+
+function setActiveSwatch(el) {
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function clearActiveSwatch() {
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+}
 
 // 2. Update UI Simulator
 function updateTheme(hex) {
@@ -83,12 +110,15 @@ genBtn.onclick = async () => {
   // Generate the zip content
   const blob = await zip.generateAsync({ type: "blob" });
 
-  // Use Chrome's download API to save the zip
+  // Trigger download via a temporary anchor element
   const url = URL.createObjectURL(blob);
-  chrome.downloads.download({
-    url: url,
-    filename: `ChromeTheme_${themeName}.zip`
-  });
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ChromeTheme_${themeName}.zip`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
 
 // --- Helper Utilities ---
@@ -114,4 +144,5 @@ function lightenDarkenColor(col, amt) {
 
 // Set picker to last color
 manualPicker.value = currentHex;
+if (hexInput) hexInput.value = currentHex;
 updateTheme(currentHex);

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChromaShift — Chrome Theme Generator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      color: #666;
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* Simulator */
+    .simulator {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    #sim-frame {
+      height: 36px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: flex-end;
+      transition: background-color 0.3s;
+    }
+
+    #sim-tab {
+      width: 90px;
+      height: 26px;
+      border-radius: 8px 8px 0 0;
+      font-size: 11px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    #sim-toolbar {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      transition: background-color 0.3s;
+    }
+
+    .address-bar {
+      width: 75%;
+      height: 14px;
+      background: rgba(255,255,255,0.45);
+      border-radius: 10px;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+
+    .swatch {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .swatch:hover { transform: scale(1.1); }
+    .swatch.active { border-color: #1a1a1a; transform: scale(1.05); }
+
+    .picker-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .picker-row input[type="color"] {
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 2px;
+      background: #f0f2f5;
+    }
+
+    .hex-input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: monospace;
+      color: #333;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .hex-input:focus { border-color: #1a73e8; }
+
+    .name-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #333;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .name-input:focus { border-color: #1a73e8; }
+
+    .download-btn {
+      width: 100%;
+      padding: 13px;
+      background: #1a73e8;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .download-btn:hover { background: #1558b0; }
+    .download-btn:active { transform: scale(0.98); }
+
+    .hint {
+      text-align: center;
+      font-size: 0.78rem;
+      color: #aaa;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ChromaShift</h1>
+    <p>Generate a custom Chrome theme from a single colour</p>
+  </header>
+
+  <div class="card">
+    <div class="simulator">
+      <div id="sim-frame">
+        <div id="sim-tab">Active Tab</div>
+      </div>
+      <div id="sim-toolbar">
+        <div class="address-bar"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div>
+        <div class="section-label">Colour Palette</div>
+        <div class="palette" id="material-palette"></div>
+      </div>
+
+      <div>
+        <div class="section-label">Custom Colour</div>
+        <div class="picker-row">
+          <input type="color" id="manual-picker" value="#1a73e8">
+          <input type="text" class="hex-input" id="hex-input" value="#1a73e8" maxlength="7" placeholder="#rrggbb">
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Theme Name</div>
+        <input type="text" class="name-input" id="theme-name" placeholder="My Theme">
+      </div>
+
+      <button class="download-btn" id="generate-btn">Download Theme (.zip)</button>
+    </div>
+  </div>
+
+  <p class="hint">Unzip and load via chrome://extensions in Developer Mode</p>
+
+  <script src="jszip.min.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
